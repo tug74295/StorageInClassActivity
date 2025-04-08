@@ -14,8 +14,9 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.squareup.picasso.Picasso
 import org.json.JSONObject
+import java.io.File
+import java.io.FileOutputStream
 
-// TODO (1: Fix any bugs)
 // TODO (2: Add function saveComic(...) to save comic info when downloaded
 // TODO (3: Automatically load previously saved comic when app starts)
 
@@ -28,10 +29,14 @@ class MainActivity : AppCompatActivity() {
     lateinit var showButton: Button
     lateinit var comicImageView: ImageView
 
+    private var internalFile = "comic.json"
+    private lateinit var file: File
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        file = File(filesDir, internalFile)
         requestQueue = Volley.newRequestQueue(this)
 
         titleTextView = findViewById<TextView>(R.id.comicTitleTextView)
@@ -62,11 +67,18 @@ class MainActivity : AppCompatActivity() {
         titleTextView.text = comicObject.getString("title")
         descriptionTextView.text = comicObject.getString("alt")
         Picasso.get().load(comicObject.getString("img")).into(comicImageView)
+        saveComic(comicObject)
     }
 
     // Implement this function
     private fun saveComic(comicObject: JSONObject) {
-
+        try {
+            val outputStream = FileOutputStream(file)
+            outputStream.write(comicObject.toString().toByteArray())
+            outputStream.close()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
 
