@@ -17,8 +17,6 @@ import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 
-// TODO (2: Add function saveComic(...) to save comic info when downloaded
-// TODO (3: Automatically load previously saved comic when app starts)
 
 class MainActivity : AppCompatActivity() {
 
@@ -48,6 +46,16 @@ class MainActivity : AppCompatActivity() {
         showButton.setOnClickListener {
             downloadComic(numberEditText.text.toString())
         }
+        if (file.exists()) {
+            val br = file.bufferedReader()
+            val json = StringBuilder()
+            var line: String?
+            while (br.readLine().also { line = it } != null) {
+                json.append(line)
+            }
+            br.close()
+            showComic(JSONObject(json.toString()))
+        }
 
     }
 
@@ -56,7 +64,9 @@ class MainActivity : AppCompatActivity() {
         val url = "https://xkcd.com/$comicId/info.0.json"
         requestQueue.add (
             JsonObjectRequest(url
-                , {showComic(it)}
+                , {
+                    saveComic(it)
+                    showComic(it)}
                 , {}
             )
         )
@@ -67,7 +77,6 @@ class MainActivity : AppCompatActivity() {
         titleTextView.text = comicObject.getString("title")
         descriptionTextView.text = comicObject.getString("alt")
         Picasso.get().load(comicObject.getString("img")).into(comicImageView)
-        saveComic(comicObject)
     }
 
     // Implement this function
